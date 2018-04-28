@@ -1,0 +1,17 @@
+{
+  "name": "generations",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "3.5.1",
+    "d3": "5.1.0",
+    "lodash": "4.17.10",
+    "parse-gedcom": "1.0.3"
+  }
+}
