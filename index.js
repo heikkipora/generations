@@ -7,20 +7,57 @@ const readFileAsync = Promise.promisify(fs.readFile)
 readFileAsync('pora.ged', 'utf8')
   .then(gedcom.parse)
   .then(nodes => {
-    const individuals = _(nodes)
-      .filter({tag: 'INDI'})
-      .map(toPerson)
-      .value()
-    console.log(JSON.stringify(individuals, null, 2))
+    const persons = toPersons(nodes)
+    const families = toFamilies(nodes)
+
+    console.log(JSON.stringify(persons, null, 2))
+    console.log(JSON.stringify(families, null, 2))
   })
+
+function toPersons(nodes) {
+  return _(nodes)
+    .filter({tag: 'INDI'})
+    .map(toPerson)
+    .value()
+}
 
 function toPerson(node) {
   return {
+    id: node.pointer,
     name: name(node),
     sex: sex(node),
     birth: birthYear(node),
     death: deathYear(node)
   }
+}
+
+function toFamilies(nodes) {
+  return _(nodes)
+    .filter({tag: 'FAM'})
+    .map(toFamily)
+    .value()
+}
+
+function toFamily(node) {
+  return {
+    father: husband(node),
+    mother: wife(node),
+    children: children(node)
+  }
+}
+
+function husband(node) {
+  return tagData('HUSB', node)
+    .head()
+}
+
+function wife(node) {
+  return tagData('WIFE', node)
+    .head()
+}
+
+function children(node) {
+  return tagData('CHIL', node)
 }
 
 function sex(node) {
