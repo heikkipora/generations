@@ -14,6 +14,10 @@ readFileAsync('pora.ged', 'utf8')
     const families = toFamilies(nodes)
 
     const rootPerson = _.find(persons, {name: startFrom})
+    if (!rootPerson) {
+      console.error(`'${startFrom}' not found from tree`)
+      return
+    }
     const tree = addParentsRecursive(rootPerson, persons, families)
     const stats = collectStatistics(tree)
 
