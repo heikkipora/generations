@@ -4,15 +4,57 @@ const gedcom = require('parse-gedcom')
 const Promise = require('bluebird')
 
 const readFileAsync = Promise.promisify(fs.readFile)
+
+const startFrom = 'Heikki Pora'
+
 readFileAsync('pora.ged', 'utf8')
   .then(gedcom.parse)
   .then(nodes => {
     const persons = toPersons(nodes)
     const families = toFamilies(nodes)
 
-    console.log(JSON.stringify(persons, null, 2))
-    console.log(JSON.stringify(families, null, 2))
+    const rootPerson = _.find(persons, {name: startFrom})
+    const tree = addParentsRecursive(rootPerson, persons, families)
+
+    console.log(JSON.stringify(tree, null, 2))
   })
+
+function addParentsRecursive(currentPerson, persons, families) {
+  if (!currentPerson) {
+    return
+  }
+
+  const {father, mother} = findParentsForPersonById(currentPerson.id, persons, families)
+  if (!father && !mother) {
+    return currentPerson
+  }
+
+  return _.extend(currentPerson, {
+    father: addParentsRecursive(father, persons, families),
+    mother: addParentsRecursive(mother, persons, families)
+  })
+}
+
+function findParentsForPersonById(id, persons, families) {
+  if (!id) {
+    return {}
+  }
+  const family = _.find(families, family => _.includes(family.children, id))
+  if (!family) {
+    return {}
+  }
+  return {
+    father: findPersonById(family.father, persons),
+    mother: findPersonById(family.mother, persons)
+  }
+}
+
+function findPersonById(id, persons) {
+  if (!id) {
+    return
+  }
+  return _.find(persons, {id})
+}
 
 function toPersons(nodes) {
   return _(nodes)
@@ -58,6 +100,7 @@ function wife(node) {
 
 function children(node) {
   return tagData('CHIL', node)
+  .value()
 }
 
 function sex(node) {
