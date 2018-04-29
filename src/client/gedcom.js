@@ -1,29 +1,19 @@
-const _ = require('lodash')
-const fs = require('fs')
-const gedcom = require('parse-gedcom')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import gedcom from 'parse-gedcom'
 
-const readFileAsync = Promise.promisify(fs.readFile)
+export function parseGedcom(data) {
+  const nodes = gedcom.parse(data)
+  const persons = toPersons(nodes)
+  const families = toFamilies(nodes)
+  return {persons, families}
+}
 
-const startFrom = 'Heikki Pora'
-
-readFileAsync('pora.ged', 'utf8')
-  .then(gedcom.parse)
-  .then(nodes => {
-    const persons = toPersons(nodes)
-    const families = toFamilies(nodes)
-
-    const rootPerson = _.find(persons, {name: startFrom})
-    if (!rootPerson) {
-      console.error(`'${startFrom}' not found from tree`)
-      return
-    }
-    const tree = addParentsRecursive(rootPerson, persons, families)
-    const stats = collectStatistics(tree)
-
-    console.log(JSON.stringify(tree, null, 2))
-    console.log(JSON.stringify(stats, null, 2))
-  })
+export function toTree(persons, families, personId) {
+  const rootPerson = findPersonById(personId, persons)
+  const tree = addParentsRecursive(rootPerson, persons, families)
+  const stats = collectStatistics(tree)
+  return {tree, stats}
+}
 
 function collectStatistics(tree) {
   let people = 0
@@ -91,12 +81,15 @@ function toPersons(nodes) {
 }
 
 function toPerson(node) {
+  const birth = birthYear(node)
+  const death = deathYear(node)
   return {
     id: node.pointer,
     name: name(node),
     sex: sex(node),
-    birth: birthYear(node),
-    death: deathYear(node)
+    birth,
+    death,
+    yearsLabel: `${birth || ''}-${death || ''}`
   }
 }
 

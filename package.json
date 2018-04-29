@@ -1,17 +1,59 @@
 {
   "name": "generations",
   "version": "1.0.0",
-  "description": "",
+  "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node src/app.js",
+    "test": "./node_modules/.bin/eslint src --fix"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babel-core": "6.26.0",
+    "babel-plugin-transform-class-properties": "6.24.1",
+    "babel-plugin-transform-object-rest-spread": "6.26.0",
+    "babel-plugin-transform-runtime": "6.23.0",
+    "babel-polyfill": "6.26.0",
+    "babel-preset-env": "1.6.1",
+    "babel-preset-react": "6.24.1",
+    "babel-register": "6.26.0",
+    "babelify": "8.0.0",
     "bluebird": "3.5.1",
+    "browserify": "16.1.1",
+    "browserify-middleware": "8.1.0",
+    "compression": "1.7.2",
     "d3": "5.1.0",
+    "express": "4.16.3",
+    "less-middleware": "2.2.1",
     "lodash": "4.17.10",
-    "parse-gedcom": "1.0.3"
+    "parse-gedcom": "1.0.3",
+    "react": "16.3.0",
+    "react-dom": "16.3.0",
+    "react-select": "1.2.1"
+  },
+  "devDependencies": {
+    "eslint": "4.19.1",
+    "eslint-plugin-react": "7.7.0"
+  },
+  "engines": {
+    "node": "9.10.1",
+    "npm": "6.0.0"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "env",
+            "react"
+          ],
+          "plugins": [
+            "transform-class-properties"
+          ]
+        }
+      ]
+    ]
   }
 }
