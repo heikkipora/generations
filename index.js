@@ -15,9 +15,32 @@ readFileAsync('pora.ged', 'utf8')
 
     const rootPerson = _.find(persons, {name: startFrom})
     const tree = addParentsRecursive(rootPerson, persons, families)
+    const stats = collectStatistics(tree)
 
     console.log(JSON.stringify(tree, null, 2))
+    console.log(JSON.stringify(stats, null, 2))
   })
+
+function collectStatistics(tree) {
+  let people = 0
+  let latest = tree.death || (new Date()).getFullYear()
+  let earliest = latest
+
+  function countPersonRecursive(person) {
+    if (!person) {
+      return
+    }
+    people = people + 1
+    const year = person.birth || person.death
+    if (year && year < earliest) {
+      earliest = year
+    }
+    countPersonRecursive(person.father)
+    countPersonRecursive(person.mother)
+  }
+  countPersonRecursive(tree)
+  return {people, years: latest - earliest, earliest, latest}
+}
 
 function addParentsRecursive(currentPerson, persons, families) {
   if (!currentPerson) {
@@ -130,7 +153,7 @@ function extractYear(date) {
   const regex = /([1-9][0-9]{2,3})/
   const matches = regex.exec(date)
   if (matches && matches.length >= 2) {
-    return matches[1]
+    return Number(matches[1])
   }
 }
 
