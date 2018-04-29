@@ -11,7 +11,8 @@ class GenerationsApp extends React.Component {
       persons: [],
       families: [],
       selectedPerson: '',
-      tree: {}
+      tree: {},
+      stats: {}
     }
   }
 
@@ -20,15 +21,53 @@ class GenerationsApp extends React.Component {
 
   render = () =>
     <div>
-      <section className="is-primary">
-        <textarea value={this.state.raw} onChange={this.handleGedcomChange} className="textarea is-small" placeholder="Paste GEDCOM data here" rows="5"></textarea>
-        <p>Found {this.state.persons.length} people and {this.state.families.length} families.</p>
+      <section className="hero is-primary">
+        <div className="hero-body">
+          <div className="container content">
+            <h1 className="title">
+              Generations
+            </h1>
+            <p>Visualizing a GEDCOM format genealogy data file as tree.</p>
+            <p>All processing is done securely in your browser and no data is submitted to a remote server.</p>
+          </div>
+        </div>
       </section>
-      <section>
-        {this.renderSelect()}
-      </section>
-      <section>
-        <pre>{JSON.stringify(this.state.tree, null, 2)}</pre>
+      <section className="hero">
+        <div className="hero-body">
+          <div className="container content">
+            <textarea value={this.state.raw} onChange={this.handleGedcomChange} className="textarea is-small" placeholder="Paste GEDCOM data here" rows="5"></textarea>
+            <p>Found {this.state.persons.length} people and {this.state.families.length} families.</p>
+            {this.renderSelect()}
+            <p>&nbsp;</p>
+            <nav className="level">
+              <div className="level-item has-text-centered">
+                <div>
+                  <p className="heading">People</p>
+                  <p className="title">{this.state.stats.people || '-'}</p>
+                </div>
+              </div>
+              <div className="level-item has-text-centered">
+                <div>
+                  <p className="heading">Years</p>
+                  <p className="title">{this.state.stats.years || '-'}</p>
+                </div>
+              </div>
+              <div className="level-item has-text-centered">
+                <div>
+                  <p className="heading">Earliest</p>
+                  <p className="title">{this.state.stats.earliest || '-'}</p>
+                </div>
+              </div>
+              <div className="level-item has-text-centered">
+                <div>
+                  <p className="heading">Latest</p>
+                  <p className="title">{this.state.stats.latest || '-'}</p>
+                </div>
+              </div>
+            </nav>
+            <pre>{JSON.stringify(this.state.tree, null, 2)}</pre>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -49,8 +88,8 @@ class GenerationsApp extends React.Component {
   }
 
   handlePersonChange = selectedPerson => {
-    const tree = toTree(this.state.persons, this.state.families, selectedPerson.value)
-    this.setState({selectedPerson, tree})
+    const {tree, stats} = selectedPerson ? toTree(this.state.persons, this.state.families, selectedPerson.value) : {tree: {}, stats: {}}
+    this.setState({selectedPerson, tree, stats})
   }
 
   personToOption = person => {
