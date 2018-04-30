@@ -75,7 +75,8 @@ class GenerationsApp extends React.Component {
     <Select name="persons"
             value={this.state.selectedPerson}
             onChange={this.handlePersonChange}
-            options={this.state.persons.map(this.personToOption)}/>
+            options={this.state.persons.map(this.personToOption)}
+            placeholder="Select a person..."/>
 
   handleGedcomChange = event => {
     const raw = event.target.value

@@ -10,46 +10,40 @@ export function parseGedcom(data) {
 
 export function toTree(persons, families, personId) {
   const rootPerson = findPersonById(personId, persons)
-  const tree = addParentsRecursive(rootPerson, persons, families)
+  const tree = addParentsRecursive(rootPerson, persons, families, {nodes: [rootPerson], links: []})
   const stats = collectStatistics(tree)
   return {tree, stats}
 }
 
 function collectStatistics(tree) {
-  let people = 0
-  let latest = tree.death || (new Date()).getFullYear()
-  let earliest = latest
+  const people = tree.nodes.length
+  const latest = tree.nodes[0].death || (new Date()).getFullYear()
 
-  function countPersonRecursive(person) {
-    if (!person) {
-      return
-    }
-    people = people + 1
+  const earliest = tree.nodes.reduce((acc, person) => {
     const year = person.birth || person.death
-    if (year && year < earliest) {
-      earliest = year
-    }
-    countPersonRecursive(person.father)
-    countPersonRecursive(person.mother)
-  }
-  countPersonRecursive(tree)
+    return year ? Math.min(year, acc) : acc
+  }, latest)
+
   return {people, years: latest - earliest, earliest, latest}
 }
 
-function addParentsRecursive(currentPerson, persons, families) {
-  if (!currentPerson) {
-    return
-  }
+function addParentsRecursive(currentPerson, persons, families, tree) {
+  const source = tree.nodes.length - 1
 
   const {father, mother} = findParentsForPersonById(currentPerson.id, persons, families)
-  if (!father && !mother) {
-    return currentPerson
+  if (father) {
+    const target = tree.nodes.length
+    tree.nodes.push(father)
+    tree.links.push({source, target, type: 'father'})
+    addParentsRecursive(father, persons, families, tree)
   }
-
-  return _.extend(currentPerson, {
-    father: addParentsRecursive(father, persons, families),
-    mother: addParentsRecursive(mother, persons, families)
-  })
+  if (mother) {
+    const target = tree.nodes.length
+    tree.nodes.push(mother)
+    tree.links.push({source, target, type: 'mother'})
+    addParentsRecursive(mother, persons, families, tree)
+  }
+  return tree
 }
 
 function findParentsForPersonById(id, persons, families) {
