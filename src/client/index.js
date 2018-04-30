@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Select from 'react-select'
+import Tree from './tree'
 import {parseGedcom, toTree} from './gedcom'
 
 class GenerationsApp extends React.Component {
@@ -65,7 +66,7 @@ class GenerationsApp extends React.Component {
                 </div>
               </div>
             </nav>
-            <pre>{JSON.stringify(this.state.tree, null, 2)}</pre>
+            <Tree nodes={this.state.tree.nodes || []} links={this.state.tree.links || []}/>
           </div>
         </div>
       </section>
